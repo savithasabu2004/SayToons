@@ -20,6 +20,20 @@ def home():
         return "SayToons AI Backend is Running ✅"
 
 
+# Serve the login page so client-side redirects to 'login.html' work
+@app.route('/login.html')
+def login_html():
+    try:
+        return send_file('login.html')
+    except Exception:
+        return "Login page not found", 404
+
+
+@app.route('/login')
+def login():
+    return login_html()
+
+
 # 🟢 Get Levels (Already works with your frontend)
 @app.route("/get-levels", methods=["GET"])
 def get_levels():
