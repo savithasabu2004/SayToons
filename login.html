@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAYTOONS - Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Your New Color Theme */
+            --primary-start: #a14598;
+            --primary-end: #fa1acf;
+            --accent-dark: #802e75;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            /* Smoothened Background Gradient with your colors */
+            background: radial-gradient(circle at center, #fa1acf 0%, #d035b3 50%, #a14598 100%);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .logo {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 60px;
+            color: white;
+            text-shadow: 0 6px 8px rgba(0,0,0,0.25);
+            margin-bottom: 15px;
+        }
+
+        .auth-container {
+            position: relative;
+            width: 700px;
+            height: 380px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border-radius: 190px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            transition: all 0.5s ease-in-out;
+            z-index: 1;
+        }
+
+        .panel.inactive .form-content {
+            display: none;
+        }
+
+        .sliding-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+            border-radius: 190px;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 0;
+        }
+
+        .auth-container.login-active .sliding-overlay {
+            transform: translateX(66.6%);
+        }
+
+        .panel h2 {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 36px;
+            margin: 10px 0;
+            color: white;
+            text-shadow: 0 4px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+
+        .panel.inactive h2 {
+            color: rgba(255, 255, 255, 0.5);
+            text-shadow: none;
+        }
+
+        .form-content {
+            width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .form-group { width: 80%; margin-bottom: 12px; }
+
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(255,255,255,0.6);
+            padding: 8px 0;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        input::placeholder { color: rgba(255,255,255,0.7); }
+
+        .btn {
+            background: white;
+            color: var(--primary-start);
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 22px;
+            padding: 8px 35px;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 0 #ddd;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #ddd;
+        }
+
+        .link-text {
+            font-size: 11px;
+            color: white;
+            margin-top: 8px;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo">SAYTOONS</div>
+
+    <div class="auth-container" id="container">
+        <div class="sliding-overlay"></div>
+
+        <div class="panel" id="signup-panel">
+            <h2 onclick="toggleAuth(false)">Sign Up</h2>
+            <div class="form-content">
+                <form id="signupForm">
+                    <div class="form-group"><input type="text" id="signup-name" placeholder="Full Name" required></div>
+                    <div class="form-group"><input type="email" id="signup-email" placeholder="Email" required></div>
+                    <div class="form-group"><input type="password" id="signup-password" placeholder="Password" required></div>
+                    <div class="form-group"><input type="password" id="signup-confirm" placeholder="Confirm Password" required></div>
+                    <div class="link-text" onclick="toggleAuth(true)">Already have an account?</div>
+                    <button type="submit" class="btn">SIGN UP</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="panel inactive" id="login-panel">
+            <h2 onclick="toggleAuth(true)">Log In</h2>
+            <div class="form-content">
+                <form id="loginForm">
+                    <div class="form-group"><input type="email" id="login-email" placeholder="Email" required></div>
+                    <div class="form-group"><input type="password" id="login-password" placeholder="Password" required></div>
+                    <div class="link-text" onclick="alert('Reset email sent!')">forgot password?</div>
+                    <div class="link-text" onclick="toggleAuth(false)">Haven't started an account?</div>
+                    <button type="submit" class="btn">LOGIN</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const loginPanel = document.getElementById('login-panel');
+        const signupPanel = document.getElementById('signup-panel');
+
+        function toggleAuth(isLogin) {
+            if (isLogin) {
+                container.classList.add('login-active');
+                loginPanel.classList.remove('inactive');
+                signupPanel.classList.add('inactive');
+            } else {
+                container.classList.remove('login-active');
+                loginPanel.classList.add('inactive');
+                signupPanel.classList.remove('inactive');
+            }
+        }
+
+        // Sign Up Handler
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+
+            if (password !== confirm) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            if (users.find(user => user.email === email)) {
+                alert('Email already registered!');
+                return;
+            }
+
+            users.push({ name, email, password });
+            localStorage.setItem('users', JSON.stringify(users));
+            alert('Account created successfully! Please log in.');
+            
+            // Reset form and switch to login
+            this.reset();
+            toggleAuth(true);
+        });
+
+        // Login Handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const foundUser = users.find(user => user.email === email && user.password === password);
+
+            if (foundUser) {
+                alert('Welcome back, ' + foundUser.name + ' 👋');
+                window.location.href = 'levels.html';
+            } else {
+                alert('Invalid email or password. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

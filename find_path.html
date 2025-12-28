@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Find My Path</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    background: #ffbd59;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Game Box */
+.container {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    width: 420px;
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+h1 {
+    margin-bottom: 5px;
+}
+
+.level-text {
+    font-weight: bold;
+}
+
+/* Grid */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 70px);
+    gap: 10px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.cell {
+    width: 70px;
+    height: 70px;
+    background: #ffcc00;
+    border-radius: 10px;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.blocked {
+    background: #999;
+    cursor: not-allowed;
+}
+
+/* Buttons */
+button {
+    background: #ff8c42;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 18px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+/* WIN POPUP */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-box {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 300px;
+    text-align: center;
+    animation: scaleIn 0.4s ease;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🧩 Find My Path</h1>
+    <p class="level-text" id="levelText"></p>
+
+    <div class="grid" id="grid"></div>
+
+    <button onclick="goBack()">⬅ Back</button>
+</div>
+
+<!-- WIN POPUP -->
+<div class="popup" id="popup">
+    <div class="popup-box">
+        <h2>🎉 You Win!</h2>
+        <p>Great job helping Toony!</p>
+        <button onclick="nextLevel()">Next Level ▶</button>
+    </div>
+</div>
+
+<script>
+const gridSize = 4;
+const grid = document.getElementById("grid");
+const popup = document.getElementById("popup");
+const levelText = document.getElementById("levelText");
+
+let level = 1;
+let toonyPos = 0;
+
+const levels = [
+    { goal: 15, blocked: [5] },               // Level 1
+    { goal: 15, blocked: [5,6,9] },            // Level 2
+    { goal: 15, blocked: [1,5,6,9,10] }        // Level 3 (hard)
+];
+
+function drawGrid() {
+    grid.innerHTML = "";
+    levelText.innerText = "Level " + level;
+
+    for (let i = 0; i < 16; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+
+        if (levels[level-1].blocked.includes(i)) {
+            cell.classList.add("blocked");
+            cell.innerText = "❌";
+        }
+
+        if (i === toonyPos) cell.innerText = "🐻";
+        if (i === levels[level-1].goal) cell.innerText = "⭐";
+
+        cell.onclick = () => move(i);
+        grid.appendChild(cell);
+    }
+}
+
+function move(index) {
+    if (levels[level-1].blocked.includes(index)) return;
+
+    const validMoves = [
+        toonyPos - 1,
+        toonyPos + 1,
+        toonyPos - gridSize,
+        toonyPos + gridSize
+    ];
+
+    if (!validMoves.includes(index)) return;
+
+    toonyPos = index;
+    drawGrid();
+
+    if (toonyPos === levels[level-1].goal) {
+        popup.style.display = "flex";
+    }
+}
+
+function nextLevel() {
+    popup.style.display = "none";
+
+    if (level < levels.length) {
+        level++;
+        toonyPos = 0;
+        drawGrid();
+    } else {
+        alert("🏆 All Levels Completed!");
+        window.location.href = "games.html";
+    }
+}
+
+function goBack() {
+    window.location.href = "games.html";
+}
+
+drawGrid();
+</script>
+
+</body>
+</html>

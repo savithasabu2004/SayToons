@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SayToons - Sign Up</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      font-family: 'Comic Sans MS', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+
+      /* Background with gradient + image blend */
+      background: linear-gradient(to bottom right, #ffbd59cc, #ffbd59cc),
+                  url("images/download.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-blend-mode: lighten;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      padding: 40px;
+      width: 350px;
+      text-align: center;
+      animation: fadeIn 1.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    h2 {
+      color: #ff6f00;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #555;
+      font-size: 16px;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 2px solid #ffd54f;
+      border-radius: 20px;
+      outline: none;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      border-color: #ffb300;
+      transform: scale(1.02);
+    }
+
+    button {
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 25px;
+      padding: 12px 30px;
+      font-size: 18px;
+      margin-top: 15px;
+      cursor: pointer;
+      color: #333;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #ffd633;
+      transform: scale(1.05);
+    }
+
+    a {
+      color: #ff6f00;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Join SayToons!</h2>
+    <p>Create your fun account to start learning and exploring 🎨</p>
+
+    <form id="signupForm">
+      <input type="text" id="name" placeholder="Full Name" required><br>
+      <input type="email" id="email" placeholder="Email" required><br>
+      <input type="password" id="password" placeholder="Password" required><br>
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+  </div>
+
+  <script>
+  document.getElementById("signupForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const userExists = users.some(user => user.email === email);
+
+    if (userExists) {
+      alert("That email is already registered! Please log in instead.");
+      window.location.href = "login.html";
+    } else {
+      users.push({ name, email, password });
+      localStorage.setItem("users", JSON.stringify(users));
+
+      alert("Yay! Welcome to SayToons, " + name + " 🎉");
+      window.location.href = "levels.html";  // <-- redirect changed here
+    }
+  });
+</script>
+</body>
+</html>

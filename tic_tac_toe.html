@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tic Tac Toe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    background: #ffbd59;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 360px;
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+.status {
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* Board */
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 90px);
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.cell {
+    width: 90px;
+    height: 90px;
+    background: #ffcc00;
+    border-radius: 12px;
+    font-size: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.cell:hover {
+    background: #ffd633;
+}
+
+/* Popup */
+.popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-box {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    width: 260px;
+    text-align: center;
+}
+
+button {
+    background: #ff8c42;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 8px 18px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>❌⭕ Tic Tac Toe</h1>
+    <p class="status" id="status">Your Turn (X)</p>
+
+    <div class="board" id="board"></div>
+
+    <button onclick="goBack()">⬅ Back</button>
+</div>
+
+<!-- Popup -->
+<div class="popup" id="popup">
+    <div class="popup-box">
+        <h2 id="resultText"></h2>
+        <button onclick="restart()">Play Again</button>
+    </div>
+</div>
+
+<script>
+const board = document.getElementById("board");
+const statusText = document.getElementById("status");
+const popup = document.getElementById("popup");
+const resultText = document.getElementById("resultText");
+
+let cells = Array(9).fill("");
+let gameOver = false;
+
+const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+];
+
+// Draw board
+function drawBoard() {
+    board.innerHTML = "";
+    cells.forEach((cell, index) => {
+        const div = document.createElement("div");
+        div.className = "cell";
+        div.innerText = cell;
+        div.onclick = () => humanMove(index);
+        board.appendChild(div);
+    });
+}
+
+function humanMove(index) {
+    if (cells[index] || gameOver) return;
+
+    cells[index] = "X";
+    drawBoard();
+
+    if (checkWin("X")) {
+        endGame("🎉 You Win!");
+        return;
+    }
+
+    if (cells.every(c => c)) {
+        endGame("😐 It's a Draw");
+        return;
+    }
+
+    statusText.innerText = "Bot Thinking...";
+    setTimeout(botMove, 500);
+}
+
+function botMove() {
+    if (gameOver) return;
+
+    let move;
+
+    // 70% smart play, 30% random (child-friendly)
+    if (Math.random() < 0.7) {
+        move = findBestMove("O") || findBestMove("X");
+    }
+
+    if (move === undefined) {
+        const empty = cells
+            .map((v, i) => v === "" ? i : null)
+            .filter(v => v !== null);
+        move = empty[Math.floor(Math.random() * empty.length)];
+    }
+
+    cells[move] = "O";
+    drawBoard();
+
+    if (checkWin("O")) {
+        endGame("🤖 Bot Wins!");
+        return;
+    }
+
+    if (cells.every(c => c)) {
+        endGame("😐 It's a Draw");
+        return;
+    }
+
+    statusText.innerText = "Your Turn (X)";
+}
+
+// Try winning or blocking
+function findBestMove(player) {
+    for (let combo of wins) {
+        const values = combo.map(i => cells[i]);
+        if (values.filter(v => v === player).length === 2 &&
+            values.includes("")) {
+            return combo[values.indexOf("")];
+        }
+    }
+    return undefined;
+}
+
+function checkWin(player) {
+    return wins.some(c => c.every(i => cells[i] === player));
+}
+
+function endGame(message) {
+    gameOver = true;
+    resultText.innerText = message;
+    popup.style.display = "flex";
+}
+
+function restart() {
+    cells = Array(9).fill("");
+    gameOver = false;
+    popup.style.display = "none";
+    statusText.innerText = "Your Turn (X)";
+    drawBoard();
+}
+
+function goBack() {
+    window.location.href = "games.html";
+}
+
+drawBoard();
+</script>
+
+</body>
+</html>

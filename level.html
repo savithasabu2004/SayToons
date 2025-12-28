@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SayToons Level</title>
+
+<style>
+@font-face {
+    font-family: 'ShowcardG';
+    src: url("font/SHOWG.TTF") format('truetype');
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Comic Sans MS', sans-serif;
+    background: linear-gradient(to bottom right, #ffbd59cc, #ffbd59cc),
+                url("images/level-bg.png");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 40px 30px;
+    border-radius: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+    animation: fadeIn 1s ease;
+}
+
+@keyframes fadeIn {
+    from {opacity:0; transform: translateY(-20px);}
+    to {opacity:1; transform: translateY(0);}
+}
+
+h1.title {
+    font-family: 'ShowcardG', sans-serif;
+    font-size: 50px;
+    color: #8a2be2;
+    margin-bottom: 15px;
+    text-shadow: 
+        -2px -2px 0 #ffd700, 
+        2px -2px 0 #ffd700, 
+        -2px 2px 0 #ffd700, 
+        2px 2px 0 #ffd700,
+        4px 4px 0 #000000;
+}
+
+p.tagline {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+#progress {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+button {
+    background: linear-gradient(180deg, #ffe066 0%, #ff8c42 100%);
+    border: none;
+    border-radius: 35px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 12px 30px;
+    margin: 10px;
+    cursor: pointer;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.25);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.35);
+}
+
+#output img {
+    margin-top: 15px;
+    border-radius: 15px;
+    max-width: 80%;
+}
+
+#output p {
+    font-size: 18px;
+    margin-top: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1 id="levelTitle" class="title">Level</h1>
+    <div id="progress"></div>
+
+    <p class="tagline">Speak a word or phrase related to this level 🎤</p>
+
+    <button onclick="startListening()">🎤 Speak Now</button>
+
+    <div id="output"></div>
+
+    <button onclick="goBack()">⬅ Back to Levels</button>
+</div>
+
+<script>
+/* ------------------ LEVEL TITLE ------------------ */
+const params = new URLSearchParams(window.location.search);
+const level = params.get('level');
+
+const titles = {
+    morning: "🌅 Morning Routine",
+    school: "🏫 School Time",
+    play: "🎮 Play Time",
+    healthy: "🍎 Healthy Habits"
+};
+
+document.getElementById("levelTitle").innerText =
+    titles[level] || "SayToons Level";
+
+/* ------------------ STAR PROGRESS ------------------ */
+const maxStars = 3;
+let stars = JSON.parse(localStorage.getItem(`progress_${level}`)) || 0;
+
+function renderStars() {
+    let starsHTML = "";
+    for (let i = 0; i < maxStars; i++) {
+        starsHTML += i < stars ? "⭐" : "☆";
+    }
+    document.getElementById("progress").innerHTML =
+        `<p>Progress: ${starsHTML}</p>`;
+}
+renderStars();
+
+/* ------------------ VOICE TO TEXT (WORKING) ------------------ */
+function startListening() {
+    const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("Please use Google Chrome for voice input.");
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+
+    recognition.start();
+
+    recognition.onresult = async function (event) {
+        const phrase = event.results[0][0].transcript.toLowerCase();
+
+        document.getElementById("output").innerHTML =
+            `<p>You said: <b>${phrase}</b></p>`;
+
+        // 🔹 Backend call kept (image may come later)
+        try {
+            const response = await fetch(
+                "http://127.0.0.1:5000/get-image-by-phrase",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phrase, level })
+                }
+            );
+
+            const data = await response.json();
+
+            if (data.image_url) {
+                document.getElementById("output").innerHTML += `
+                    <img src="${data.image_url}" alt="${phrase}">
+                    <p><i>${phrase}</i></p>
+                `;
+            }
+
+            if (stars < maxStars) {
+                stars++;
+                localStorage.setItem(`progress_${level}`, JSON.stringify(stars));
+                renderStars();
+            }
+
+        } catch (err) {
+            console.log("Backend not ready yet");
+        }
+    };
+
+    recognition.onerror = function (event) {
+        document.getElementById("output").innerHTML =
+            `<p style="color:red;">Microphone error. Please allow mic access.</p>`;
+    };
+}
+
+/* ------------------ BACK ------------------ */
+function goBack() {
+    window.location.href = "levels.html";
+}
+</script>
+
+</body>
+</html>
